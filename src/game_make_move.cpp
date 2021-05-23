@@ -1,11 +1,11 @@
 #include "game.h"
-#include "move_offset.h"
+#include "movement.h"
 
 namespace abra {
 
 // handles special pawn moves
 void game::handle_pawn_move(move m, bool &capture, bool &reset_ep) {
-  auto pawn_dir = move_offset::get_pawn_direction(color_to_move);
+  auto pawn_dir = movement::get_pawn_direction(color_to_move);
   if (m.to == en_passant) {  // en passant
     auto capture_on = m.to - pawn_dir;
     board.clear_piece(capture_on);
@@ -57,7 +57,7 @@ void game::handle_rook_move(move m) {
   }
 }
 
-// make a move and update castle flags (not reversible)
+// make a move
 void game::make_move(move m) {
   auto _piece = board.get_piece(m.from);
 

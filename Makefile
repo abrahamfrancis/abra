@@ -3,7 +3,7 @@ DBGFLAGS = -fsanitize=address -fsanitize=undefined -D_GLIBCXX_DEBUG
 CPPFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Wshadow -O3
 BUILD = build
 SRC = src
-DEPS = ${BUILD}/types.o ${BUILD}/notation.o ${BUILD}/game_fen.o ${BUILD}/game_make_move.o ${BUILD}/game.o ${BUILD}/driver.o
+DEPS = ${BUILD}/types.o ${BUILD}/notation.o ${BUILD}/game_fen.o ${BUILD}/game_moves.o ${BUILD}/game_make_move.o ${BUILD}/game.o ${BUILD}/driver.o
 
 engine: ${DEPS}
 	${CC} ${CPPFLAGS} ${DEPS} -o engine
@@ -14,7 +14,10 @@ ${BUILD}/driver.o: ${SRC}/game.h ${SRC}/notation.h ${SRC}/types.h ${SRC}/driver.
 ${BUILD}/game.o: ${SRC}/game.h ${SRC}/types.h ${SRC}/game.cpp
 	${CC} ${CPPFLAGS} -c ${SRC}/game.cpp -o ${BUILD}/game.o
 
-${BUILD}/game_make_move.o: ${SRC}/game.h ${SRC}/move_offset.h ${SRC}/game_make_move.cpp
+${BUILD}/game_moves.o: ${SRC}/game.h ${SRC}/types.h ${SRC}/movement.h ${SRC}/game_moves.cpp
+	${CC} ${CPPFLAGS} -c ${SRC}/game_moves.cpp -o ${BUILD}/game_moves.o
+
+${BUILD}/game_make_move.o: ${SRC}/game.h ${SRC}/movement.h ${SRC}/game_make_move.cpp
 	${CC} ${CPPFLAGS} -c ${SRC}/game_make_move.cpp -o ${BUILD}/game_make_move.o
 
 ${BUILD}/game_fen.o: ${SRC}/game.h ${SRC}/types.h ${SRC}/game_fen.cpp

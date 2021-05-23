@@ -1,12 +1,12 @@
-#ifndef ABRA_CONSTANTS_H
-#define ABRA_CONSTANTS_H
+#ifndef ABRA_MOVEMENT_H
+#define ABRA_MOVEMENT_H
 
 #include <cassert>
 #include <vector>
 
 #include "types.h"
 
-namespace abra::move_offset {
+namespace abra::movement {
 
 const square up = -8, down = +8, left = -1, right = +1;
 
@@ -29,6 +29,6 @@ const auto orthogonal_dir = std::vector<square>{up, down, left, right};
 const auto diagonal_dir =
     std::vector<square>{up + left, up + right, down + right, down + left};
 
-}  // namespace abra::move_offset
+}  // namespace abra::movement
 
 #endif
