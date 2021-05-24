@@ -1,9 +1,8 @@
 #include <array>
+#include <iostream>
 
 #include "game.h"
 #include "movement.h"
-
-#include <iostream>
 
 namespace abra {
 

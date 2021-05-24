@@ -83,8 +83,10 @@ void game::make_move(move m) {
   color_to_move = get_opposite_color(color_to_move);
   if (reset_ep) en_passant = null_square;
   if (color_to_move == color::white) fullmove++;
-  if (!pawn_move && !capture) halfmove_cnt++;
-  else halfmove_cnt = 0;
+  if (!pawn_move && !capture)
+    halfmove_cnt++;
+  else
+    halfmove_cnt = 0;
 }
 
 }  // namespace abra

@@ -63,7 +63,7 @@ class game {
   color get_color_to_move() const;
 
   // return list of available (legal) moves
-  std::vector<move> get_moves(bool=false) const;
+  std::vector<move> get_moves(bool = false) const;
 
   // make a move and update state
   void make_move(move);

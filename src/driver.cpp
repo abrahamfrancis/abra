@@ -107,7 +107,8 @@ int score(const game& g) {
   return s;
 }
 
-auto minimax(const game& g, int alpha, int beta, int depth, bool capture_only=false) {
+auto minimax(const game& g, int alpha, int beta, int depth,
+             bool capture_only = false) {
   using std::max;
   using std::min;
   static std::random_device rd;
@@ -118,8 +119,7 @@ auto minimax(const game& g, int alpha, int beta, int depth, bool capture_only=fa
     capture_only = true;
   }
   auto moves = g.get_moves(capture_only);
-  if (moves.empty())
-    return std::make_tuple(score(g), move{});
+  if (moves.empty()) return std::make_tuple(score(g), move{});
   depth--;
   std::shuffle(moves.begin(), moves.end(), gen);
   auto best_move = moves[0];

@@ -95,6 +95,7 @@ void board64::set_piece(square i, piece x) {
     case piece_type::king:
       set_bit(king, i);
       break;
+    case piece_type::empty:
     default:
       assert(false && "piece type is empty");
   }
