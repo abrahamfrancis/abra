@@ -24,23 +24,30 @@ class game {
   void handle_king_move(move);
   void handle_rook_move(move);
 
-  // returns a bitboard with all squares the piece  can go to
-  // "pseudo-legally" (piece should NOT be PAWN)
+  // return list of all moves except castling for piece at square
+  // ignores ally capture or checks
   bitboard get_moves(square) const;
-  bitboard get_pawn_moves(square) const;
+  // helpers
+  bitboard get_pawn_moves(square, color) const;
   bitboard get_knight_moves(square) const;
   bitboard get_bishop_moves(square) const;
   bitboard get_rook_moves(square) const;
   bitboard get_queen_moves(square) const;
-  bitboard get_king_moves(square) const;
+  bitboard get_king_moves(square) const;  // doesnt include castling
+
+  // return list of all pseudo legal moves for color
+  std::vector<move> get_moves(color) const;
 
   // returns a bitboard containing all squares attacked by color
+  // pieces attacked by same color are considered attacked
   bitboard get_attacks(color) const;
 
   // returns true if any of squares are under attack by color
   // helper for in_check & to check if you can castle
   // calls: get_attacks
   bool under_attack(const bitboard &, color) const;
+
+  bool is_material_insufficient() const;
 
  public:
   // create new game with default start position
@@ -56,7 +63,7 @@ class game {
   color get_color_to_move() const;
 
   // return list of available (legal) moves
-  std::vector<move> get_moves() const;
+  std::vector<move> get_moves(bool=false) const;
 
   // make a move and update state
   void make_move(move);

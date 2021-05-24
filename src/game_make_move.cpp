@@ -84,6 +84,7 @@ void game::make_move(move m) {
   if (reset_ep) en_passant = null_square;
   if (color_to_move == color::white) fullmove++;
   if (!pawn_move && !capture) halfmove_cnt++;
+  else halfmove_cnt = 0;
 }
 
 }  // namespace abra

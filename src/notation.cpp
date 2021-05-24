@@ -150,7 +150,7 @@ piece to_piece(const std::string &an) {
 }
 
 move to_move(const std::string &an) {
-  if (an.size() != 4 && an.size() != 53)
+  if (an.size() != 4 && an.size() != 5)
     throw new std::invalid_argument("move '" + an +
                                     "' should have exactly 4 or 5 characters");
   auto promote = (an.size() == 4 ? piece{} : to_piece(std::string{an[4]}));

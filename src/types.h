@@ -4,6 +4,7 @@
 #include <bitset>
 #include <cassert>
 #include <cstdint>
+#include <utility>
 
 namespace abra {
 
@@ -23,6 +24,9 @@ struct piece {
   piece();
   piece(color, piece_type);
   bool is_empty() const;
+  bool operator==(const piece &other) {
+    return pcolor == other.pcolor && ptype == other.ptype;
+  }
 };
 
 // represent a move
@@ -30,12 +34,16 @@ struct move {
   square from, to;
   piece promotion;
   move(square = 0, square = 0, piece = {});
+  bool operator==(const move &other) {
+    return from == other.from && to == other.to && promotion == other.promotion;
+  }
 };
 
 // represent castling rights
 struct castle_rights {
   bool white_short, white_long, black_short, black_long;
   castle_rights();
+  std::pair<bool, bool> get_castle_rights(color) const;
 };
 
 // represent 64 bit board
@@ -68,39 +76,15 @@ inline bool is_valid_square(square s) { return 0 <= s && s < 64; }
 inline int get_row(square s) { return s / 8; }
 inline int get_col(square s) { return s % 8; }
 
-piece::piece() : pcolor{color::none}, ptype{piece_type::empty} {};
-piece::piece(color _color, piece_type _type) : pcolor{_color}, ptype{_type} {
-  assert(_color != color::none);
-  assert(_type != piece_type::empty);
-};
 inline bool piece::is_empty() const { return pcolor == color::none; }
 
-move::move(square _from, square _to, piece _promotion)
-    : from{_from}, to{_to}, promotion{_promotion} {};
-
-castle_rights::castle_rights()
-    : white_short{false},
-      white_long{false},
-      black_short{false},
-      black_long{false} {};
-
-board64::board64()
-    : white{0},
-      black{0},
-      pawn{0},
-      knight{0},
-      bishop{0},
-      rook{0},
-      queen{0},
-      king{0} {};
-
 // bitboard operations
-constexpr bitboard _one{1};
-inline void set_bit(bitboard &b, square i) { b |= (_one << i); }
-inline void reset_bit(bitboard &b, square i) { b &= ~(_one << i); }
-inline void flip_bit(bitboard &b, square i) { b ^= (_one << i); }
+inline bitboard to_bitboard(square i) { return bitboard{1} << i; }
+inline void set_bit(bitboard &b, square i) { b |= to_bitboard(i); }
+inline void reset_bit(bitboard &b, square i) { b &= ~to_bitboard(i); }
+inline void flip_bit(bitboard &b, square i) { b ^= to_bitboard(i); }
 inline bool test_bit(const bitboard &b, square i) {
-  return static_cast<bool>(b & (_one << i));
+  return static_cast<bool>((b >> i) & 1);
 }
 inline void move_bit(bitboard &b, square f, square t) {
   if (test_bit(b, f) != test_bit(b, t)) flip_bit(b, t);

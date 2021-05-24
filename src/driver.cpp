@@ -107,14 +107,20 @@ int score(const game& g) {
   return s;
 }
 
-auto minimax(const game& g, int alpha, int beta, int depth) {
+auto minimax(const game& g, int alpha, int beta, int depth, bool capture_only=false) {
   using std::max;
   using std::min;
   static std::random_device rd;
   static std::mt19937 gen(rd());
-  if (g.is_terminal() || depth <= 0) return std::make_tuple(score(g), move{});
+  if (g.is_terminal()) {
+    return std::make_tuple(score(g), move{});
+  } else if (!capture_only && depth <= 0) {
+    capture_only = true;
+  }
+  auto moves = g.get_moves(capture_only);
+  if (moves.empty())
+    return std::make_tuple(score(g), move{});
   depth--;
-  auto moves = g.get_moves();
   std::shuffle(moves.begin(), moves.end(), gen);
   auto best_move = moves[0];
   int score = 0;
@@ -125,7 +131,7 @@ auto minimax(const game& g, int alpha, int beta, int depth) {
     for (auto m : moves) {
       game new_game{g};
       new_game.make_move(m);
-      auto [x, mv] = minimax(new_game, alpha, beta, depth);
+      auto [x, mv] = minimax(new_game, alpha, beta, depth, capture_only);
       if (x > score) {
         score = x;
         best_move = m;
@@ -139,7 +145,7 @@ auto minimax(const game& g, int alpha, int beta, int depth) {
     for (auto m : moves) {
       game new_game{g};
       new_game.make_move(m);
-      auto [x, mv] = minimax(new_game, alpha, beta, depth);
+      auto [x, mv] = minimax(new_game, alpha, beta, depth, capture_only);
       if (x < score) {
         score = x;
         best_move = m;
@@ -200,7 +206,7 @@ int main(int argc, const char* argv[]) {
           std::cout << "illegal!" << std::endl;
           continue;
         }
-        g.make_move();
+        g.make_move(mv);
       }
       show_board(g);
       show_moves(g);
