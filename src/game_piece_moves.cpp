@@ -1,16 +1,17 @@
 #include <array>
-#include <iostream>
 
 #include "game.h"
 #include "movement.h"
 
 namespace abra {
 
+using namespace movement;
+
 // pawns
 
 bitboard game::get_pawn_moves(square s, color c) const {
   auto moves = bitboard{0};
-  auto pawn_dir = movement::get_pawn_direction(c);
+  auto pawn_dir = get_pawn_direction(c);
   auto start_row = (c == color::white) ? 6 : 1;
   auto vacant = ~bitboard{board.black | board.white};
   auto row = get_row(s), col = get_col(s);
@@ -30,47 +31,49 @@ bitboard game::get_pawn_moves(square s, color c) const {
 
   // add pawn capture along direction (including en passant)
   auto add_capture = [&](square dir) {
-    auto edge = (dir == movement::left ? 0 : 7);
+    auto edge = (dir == left ? 0 : 7);
     if (col == edge) return;  // edge of board
     auto sq = s + pawn_dir + dir;
     // if square has piece or is an en passant target
     if (!test_bit(vacant, sq) || sq == en_passant) set_bit(moves, sq);
   };
 
-  add_capture(movement::left);
-  add_capture(movement::right);
+  add_capture(left);
+  add_capture(right);
 
   return moves;
 }
-
-// short range pieces
 
 inline static bool is_valid_dimension(square i) { return 0 <= i && i < 8; }
 
-bitboard game::get_knight_moves(square s) const {
-  auto moves = bitboard{0};
-  constexpr std::array<std::pair<int, int>, 8> offsets{
-      {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}}};
-  int r = get_row(s), c = get_col(s);
-  for (auto [dr, dc] : offsets) {
-    auto i = r + dr, j = c + dc;
-    if (!is_valid_dimension(i) || !is_valid_dimension(j)) continue;
-    set_bit(moves, square{8 * i + j});
+// short range pieces
+
+constexpr auto make_jump_table(std::array<square, 8> offsets) {
+  std::array<bitboard, 64> moves{};
+  for (square s = 0; s < 64; s++) {
+    int r = get_row(s), c = get_col(s);
+    for (auto x : offsets) {
+      auto dr = get_row(x), dc = get_col(x);
+      auto i = r + dr, j = c + dc;
+      if (!is_valid_dimension(i) || !is_valid_dimension(j)) continue;
+      set_bit(moves[s], square{8 * i + j});
+    }
   }
   return moves;
 }
 
+bitboard game::get_knight_moves(square s) const {
+  const static auto knight_moves = make_jump_table(
+      {2 * up + left, 2 * up + right, 2 * down + left, 2 * down + right,
+       up + 2 * left, down + 2 * left, up + 2 * right, down + 2 * right});
+  return knight_moves[s];
+}
+
 bitboard game::get_king_moves(square s) const {
-  auto moves = bitboard{0};
-  constexpr std::array<std::pair<int, int>, 8> offsets{
-      {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}}};
-  int r = get_row(s), c = get_col(s);
-  for (auto [dr, dc] : offsets) {
-    auto i = r + dr, j = c + dc;
-    if (!is_valid_dimension(i) || !is_valid_dimension(j)) continue;
-    set_bit(moves, square{8 * i + j});
-  }
-  return moves;
+  const static auto king_moves =
+      make_jump_table({up, down, left, right, up + left, up + right,
+                       down + left, down + right});
+  return king_moves[s];
 }
 
 bitboard game::get_bishop_moves(square s) const {
