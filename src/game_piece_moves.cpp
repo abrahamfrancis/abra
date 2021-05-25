@@ -48,12 +48,18 @@ inline static bool is_valid_dimension(square i) { return 0 <= i && i < 8; }
 
 // short range pieces
 
+inline static auto get_offset_components(square off) {
+  auto x = square{36};  // a central square
+  auto y = x + off;
+  return std::make_pair(get_row(y) - get_row(x), get_col(y) - get_col(x));
+}
+
 constexpr auto make_jump_table(std::array<square, 8> offsets) {
   std::array<bitboard, 64> moves{};
   for (square s = 0; s < 64; s++) {
     int r = get_row(s), c = get_col(s);
     for (auto x : offsets) {
-      auto dr = get_row(x), dc = get_col(x);
+      auto [dr, dc] = get_offset_components(x);
       auto i = r + dr, j = c + dc;
       if (!is_valid_dimension(i) || !is_valid_dimension(j)) continue;
       set_bit(moves[s], square{8 * i + j});

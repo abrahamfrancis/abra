@@ -1,7 +1,12 @@
-#include <bits/stdc++.h>
-
+#include <algorithm>
+#include <chrono>
 #include <exception>
+#include <iostream>
 #include <random>
+#include <sstream>
+#include <string>
+#include <tuple>
+#include <vector>
 
 #include "game.h"
 #include "notation.h"
@@ -107,18 +112,15 @@ int score(const game& g) {
   return s;
 }
 
-auto minimax(const game& g, int alpha, int beta, int depth,
-             bool capture_only = false) {
+auto minimax(const game& g, int alpha, int beta, int depth) {
   using std::max;
   using std::min;
   static std::random_device rd;
   static std::mt19937 gen(rd());
-  if (g.is_terminal()) {
+  if (g.is_terminal() || depth <= 0) {
     return std::make_tuple(score(g), move{});
-  } else if (!capture_only && depth <= 0) {
-    capture_only = true;
   }
-  auto moves = g.get_moves(capture_only);
+  auto moves = g.get_moves();
   if (moves.empty()) return std::make_tuple(score(g), move{});
   depth--;
   std::shuffle(moves.begin(), moves.end(), gen);
@@ -131,7 +133,7 @@ auto minimax(const game& g, int alpha, int beta, int depth,
     for (auto m : moves) {
       game new_game{g};
       new_game.make_move(m);
-      auto [x, mv] = minimax(new_game, alpha, beta, depth, capture_only);
+      auto [x, mv] = minimax(new_game, alpha, beta, depth);
       if (x > score) {
         score = x;
         best_move = m;
@@ -145,7 +147,7 @@ auto minimax(const game& g, int alpha, int beta, int depth,
     for (auto m : moves) {
       game new_game{g};
       new_game.make_move(m);
-      auto [x, mv] = minimax(new_game, alpha, beta, depth, capture_only);
+      auto [x, mv] = minimax(new_game, alpha, beta, depth);
       if (x < score) {
         score = x;
         best_move = m;
@@ -171,7 +173,7 @@ void show_moves(const game& g) {
 }
 
 auto choose_move(const game& g) {
-  int depth = 4;
+  int depth = 6;
   std::cout << "searching: (depth=" << depth << ")\n";
   return minimax(g, -inf, inf, depth);
 }
@@ -188,9 +190,15 @@ int main(int argc, const char* argv[]) {
     show_moves(g);
     while (!g.is_terminal()) {
       if (g.get_color_to_move() == us) {
+        auto begin = std::chrono::steady_clock::now();
         auto [sc, _move] = choose_move(g);
+        auto end = std::chrono::steady_clock::now();
         std::cout << "BOT: " << notation::to_AN(_move) << "  "
-                  << (sc > 0 ? "+" : "") << sc << '\n';
+                  << (sc > 0 ? "+" : "") << sc << " ("
+                  << std::chrono::duration_cast<std::chrono::milliseconds>(
+                         end - begin)
+                         .count()
+                  << "ms)\n";
         g.make_move(_move);
       } else {
         std::string their_move;

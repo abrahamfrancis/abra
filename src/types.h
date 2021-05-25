@@ -84,7 +84,7 @@ inline void set_bit(bitboard &b, square i) { b |= to_bitboard(i); }
 inline void reset_bit(bitboard &b, square i) { b &= ~to_bitboard(i); }
 inline void flip_bit(bitboard &b, square i) { b ^= to_bitboard(i); }
 inline bool test_bit(const bitboard &b, square i) {
-  return static_cast<bool>((b >> i) & 1);
+  return static_cast<bool>(b & to_bitboard(i));
 }
 inline void move_bit(bitboard &b, square f, square t) {
   if (test_bit(b, f) != test_bit(b, t)) flip_bit(b, t);

@@ -45,6 +45,7 @@ bitboard game::get_moves(square i) const {
       return get_queen_moves(i);
     case piece_type::king:
       return get_king_moves(i);
+    case piece_type::empty:;
   }
   assert(false);
 }
@@ -55,6 +56,7 @@ std::vector<move> game::get_moves(color c) const {
       std::vector<piece_type>{piece_type::knight, piece_type::bishop,
                               piece_type::rook, piece_type::queen};
   auto moves = std::vector<move>{};
+  moves.reserve(32);
   auto &colorb = get_colorb(c);
   auto last_row = (c == color::white ? 0 : 7);
   for (square i = 0; i < 64; i++) {

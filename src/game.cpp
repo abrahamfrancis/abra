@@ -45,6 +45,7 @@ bool game::in_check(color c) const {
 std::vector<move> game::get_moves(bool captures_only) const {
   auto all_moves = get_moves(color_to_move);
   auto legal_moves = std::vector<move>{};
+  legal_moves.reserve(all_moves.size());
   auto vacant = ~bitboard{board.black | board.white};
   std::copy_if(all_moves.begin(), all_moves.end(),
                std::back_inserter(legal_moves), [&](move m) {

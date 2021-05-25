@@ -102,11 +102,13 @@ void board64::set_piece(square i, piece x) {
 }
 
 piece board64::get_piece(square i) const {
-  assert(is_valid_square(i));
-
-  if (!test_bit(bitboard{white | black}, i)) return piece{};
-
-  auto pcolor = (test_bit(white, i) ? color::white : color::black);
+  auto pcolor = color{};
+  if (test_bit(white, i))
+    pcolor = color::white;
+  else if (test_bit(black, i))
+    pcolor = color::black;
+  else
+    return piece{};
 
   auto ptype = piece_type::empty;
   if (test_bit(pawn, i))
