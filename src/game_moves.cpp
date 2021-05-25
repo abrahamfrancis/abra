@@ -8,9 +8,9 @@ bitboard game::get_attacks(color c) const {
   auto &colorb = get_colorb(c);
   attacks |= get_pawn_attacks(colorb & board.pawn, c);
   attacks |= get_knight_moves(colorb & board.knight);
-  attacks |= get_bishop_moves(colorb & board.bishop);
-  attacks |= get_rook_moves(colorb & board.rook);
-  attacks |= get_queen_moves(colorb & board.queen);
+  attacks |= get_bishop_moves(colorb & (board.bishop | board.queen));
+  attacks |= get_rook_moves(colorb & (board.rook | board.queen));
+  // queen attacks are covered
   attacks |= get_king_moves(colorb & board.king);
   return attacks;
 }
