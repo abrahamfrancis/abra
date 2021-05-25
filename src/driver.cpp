@@ -179,13 +179,13 @@ auto choose_move(const game& g) {
 }
 
 int main(int argc, const char* argv[]) {
-  game g;
-  if (argc > 1) {
-    auto fen = std::string{argv[1]};
-    std::cout << "LOADING FROM: " << fen << std::endl;
-    g = game{fen};
-  }
   try {
+    game g;
+    if (argc > 1) {
+      auto fen = std::string{argv[1]};
+      std::cout << "LOADING FROM: " << fen << std::endl;
+      g = game{fen};
+    }
     show_board(g);
     show_moves(g);
     while (!g.is_terminal()) {

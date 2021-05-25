@@ -79,14 +79,14 @@ inline int get_col(square s) { return s % 8; }
 inline bool piece::is_empty() const { return pcolor == color::none; }
 
 // bitboard operations
-inline bitboard to_bitboard(square i) { return bitboard{1} << i; }
-inline void set_bit(bitboard &b, square i) { b |= to_bitboard(i); }
-inline void reset_bit(bitboard &b, square i) { b &= ~to_bitboard(i); }
-inline void flip_bit(bitboard &b, square i) { b ^= to_bitboard(i); }
-inline bool test_bit(const bitboard &b, square i) {
+inline constexpr bitboard to_bitboard(square i) { return bitboard{1} << i; }
+inline constexpr void set_bit(bitboard &b, square i) { b |= to_bitboard(i); }
+inline constexpr void reset_bit(bitboard &b, square i) { b &= ~to_bitboard(i); }
+inline constexpr void flip_bit(bitboard &b, square i) { b ^= to_bitboard(i); }
+inline constexpr bool test_bit(const bitboard &b, square i) {
   return static_cast<bool>(b & to_bitboard(i));
 }
-inline void move_bit(bitboard &b, square f, square t) {
+inline constexpr void move_bit(bitboard &b, square f, square t) {
   if (test_bit(b, f) != test_bit(b, t)) flip_bit(b, t);
 }
 inline int popcount(const bitboard &b) {

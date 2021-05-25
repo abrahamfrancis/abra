@@ -9,76 +9,54 @@ using namespace movement;
 
 inline static bool is_valid_dimension(square i) { return 0 <= i && i < 8; }
 
-inline static auto get_offset_components(square off) {
-  auto x = square{36};  // a central square
-  auto y = x + off;
-  return std::make_pair(get_row(y) - get_row(x), get_col(y) - get_col(x));
+constexpr bitboard get_rowb(int r) {
+  auto rowb = bitboard{0};
+  for (square s = 0; s < 8; s++) set_bit(rowb, 8 * r + s);
+  return rowb;
+}
+constexpr bitboard get_colb(int c) {
+  auto colb = bitboard{0};
+  for (square s = 0; s < 8; s++) set_bit(colb, 8 * s + c);
+  return colb;
+}
+inline bitboard shift_board(bitboard b, square dir) {
+  if (dir < 0)
+    b >>= -dir;
+  else
+    b <<= dir;
+  return b;
 }
 
-constexpr auto make_jump_table(const std::vector<square>& offsets) {
-  std::array<bitboard, 64> moves{};
-  for (square s = 0; s < 64; s++) {
-    int r = get_row(s), c = get_col(s);
-    for (auto x : offsets) {
-      auto [dr, dc] = get_offset_components(x);
-      auto i = r + dr, j = c + dc;
-      if (!is_valid_dimension(i) || !is_valid_dimension(j)) continue;
-      set_bit(moves[s], square{8 * i + j});
-    }
-  }
-  return moves;
-}
+constexpr bitboard col0 = get_colb(0), col1 = get_colb(1), col6 = get_colb(6),
+                   col7 = get_colb(7);
+constexpr bitboard row0 = get_rowb(0), row1 = get_rowb(1), row7 = get_rowb(7),
+                   row6 = get_rowb(6);
 
 // pawns
 
-bitboard game::get_pawn_moves(bitboard b, color c) const {
+bitboard game::get_pawn_attacks(bitboard b, color c) const {
   auto moves = bitboard{0};
-  auto pawn_dir = get_pawn_direction(c);
-  auto start_row = (c == color::white) ? 6 : 1;
-  auto vacant = ~bitboard{board.black | board.white};
-
-  for (square s = 0; s < 64; s++) {
-    if (!test_bit(b, s)) continue;
-    auto row = get_row(s), col = get_col(s);
-
-    square t = s + pawn_dir;
-
-    // pawn push
-    if (test_bit(vacant, t)) {
-      set_bit(moves, t);
-      if (row == start_row) {
-        t += pawn_dir;  // double pawn push
-        if (test_bit(vacant, t)) set_bit(moves, t);
-      }
-    }
-
-    // pawn captures
-
-    // add pawn capture along direction (including en passant)
-    auto add_capture = [&](square dir) {
-      auto edge = (dir == left ? 0 : 7);
-      if (col == edge) return;  // edge of board
-      auto sq = s + pawn_dir + dir;
-      // if square has piece or is an en passant target
-      if (!test_bit(vacant, sq) || sq == en_passant) set_bit(moves, sq);
-    };
-
-    add_capture(left);
-    add_capture(right);
-  }
-
+  if (c == color::white)
+    b = shift_board(b, up);
+  else
+    b = shift_board(b, down);
+  moves |= shift_board(b & ~col0, left);
+  moves |= shift_board(b & ~col7, right);
   return moves;
 }
 
-bitboard game::get_pawn_attacks(bitboard b, color c) const {
-  const static auto pawn_attacks = make_jump_table({left, right});
-  auto moves = bitboard{0};
-  if (c == color::white)
-    b <<= 8;  // shift all bits up
-  else
-    b >>= 8;  // shift all bits down
-  for (square s = 0; s < 64; s++)
-    if (test_bit(b, s)) moves |= pawn_attacks[s];
+bitboard game::get_pawn_moves(bitboard b, color c) const {
+  auto vacant = ~bitboard{board.black | board.white};
+  auto moves = get_pawn_attacks(b, c) & (~vacant | to_bitboard(en_passant));
+  auto pawn_dir = get_pawn_direction(c);
+  auto start_rowb = get_rowb((c == color::white) ? 6 : 1);
+
+  // one step push
+  moves |= shift_board(b, pawn_dir) & vacant;
+
+  // two step push
+  auto ps1 = shift_board(b & start_rowb, pawn_dir) & vacant;
+  moves |= shift_board(ps1, pawn_dir) & vacant;
 
   return moves;
 }
@@ -86,22 +64,29 @@ bitboard game::get_pawn_attacks(bitboard b, color c) const {
 // short range pieces
 
 bitboard game::get_knight_moves(bitboard b) const {
-  const static auto knight_moves = make_jump_table(
-      {2 * up + left, 2 * up + right, 2 * down + left, 2 * down + right,
-       up + 2 * left, down + 2 * left, up + 2 * right, down + 2 * right});
   auto moves = bitboard{0};
-  for (square s = 0; s < 64; s++)
-    if (test_bit(b, s)) moves |= knight_moves[s];
+  moves |= shift_board(b & ~(col0 | row0 | row1), 2 * up + left);
+  moves |= shift_board(b & ~(col7 | row0 | row1), 2 * up + right);
+  moves |= shift_board(b & ~(col0 | row6 | row7), 2 * down + left);
+  moves |= shift_board(b & ~(col7 | row6 | row7), 2 * down + right);
+  moves |= shift_board(b & ~(col0 | col1 | row0), 2 * left + up);
+  moves |= shift_board(b & ~(col0 | col1 | row7), 2 * left + down);
+  moves |= shift_board(b & ~(col6 | col7 | row0), 2 * right + up);
+  moves |= shift_board(b & ~(col6 | col7 | row7), 2 * right + down);
+  assert((b == 0) == (moves == 0));
   return moves;
 }
 
 bitboard game::get_king_moves(bitboard b) const {
-  const static auto king_moves =
-      make_jump_table({up, down, left, right, up + left, up + right,
-                       down + left, down + right});
   auto moves = bitboard{0};
-  for (square s = 0; s < 64; s++)
-    if (test_bit(b, s)) moves |= king_moves[s];
+  moves |= shift_board(b & ~col0, left);
+  moves |= shift_board(b & ~col7, right);
+  moves |= shift_board(b & ~row0, up);
+  moves |= shift_board(b & ~row7, down);
+  moves |= shift_board(b & ~(col0 | row0), up + left);
+  moves |= shift_board(b & ~(col7 | row0), up + right);
+  moves |= shift_board(b & ~(col0 | row7), down + left);
+  moves |= shift_board(b & ~(col7 | row7), down + right);
   return moves;
 }
 
