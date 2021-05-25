@@ -6,22 +6,12 @@ namespace abra {
 bitboard game::get_attacks(color c) const {
   auto attacks = bitboard{0};
   auto &colorb = get_colorb(c);
-  auto pawn_dir = movement::get_pawn_direction(c);
-  for (square i = 0; i < 64; i++) {
-    if (test_bit(colorb, i)) {
-      if (!test_bit(board.pawn, i)) {
-        // pieces attack where they can move
-        attacks |= get_moves(i);
-      } else {
-        // pawn attacks are different from pawn moves
-        int col = get_col(i);
-        // if not left edge, set left attack
-        if (col != 0) set_bit(attacks, i + pawn_dir + movement::left);
-        // if not right edge, set right attack
-        if (col != 7) set_bit(attacks, i + pawn_dir + movement::right);
-      }
-    }
-  }
+  attacks |= get_pawn_attacks(colorb & board.pawn, c);
+  attacks |= get_knight_moves(colorb & board.knight);
+  attacks |= get_bishop_moves(colorb & board.bishop);
+  attacks |= get_rook_moves(colorb & board.rook);
+  attacks |= get_queen_moves(colorb & board.queen);
+  attacks |= get_king_moves(colorb & board.king);
   return attacks;
 }
 
@@ -32,19 +22,20 @@ bool game::under_attack(const bitboard &squares, color c) const {
 // return list of all pseudo legal moves for piece at square
 bitboard game::get_moves(square i) const {
   auto x = board.get_piece(i);
+  auto b = to_bitboard(i);
   switch (x.ptype) {
     case piece_type::pawn:
-      return get_pawn_moves(i, x.pcolor);
+      return get_pawn_moves(b, x.pcolor);
     case piece_type::knight:
-      return get_knight_moves(i);
+      return get_knight_moves(b);
     case piece_type::bishop:
-      return get_bishop_moves(i);
+      return get_bishop_moves(b);
     case piece_type::rook:
-      return get_rook_moves(i);
+      return get_rook_moves(b);
     case piece_type::queen:
-      return get_queen_moves(i);
+      return get_queen_moves(b);
     case piece_type::king:
-      return get_king_moves(i);
+      return get_king_moves(b);
     case piece_type::empty:;
   }
   assert(false);

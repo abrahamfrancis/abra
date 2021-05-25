@@ -28,12 +28,13 @@ class game {
   // ignores ally capture or checks
   bitboard get_moves(square) const;
   // helpers
-  bitboard get_pawn_moves(square, color) const;
-  bitboard get_knight_moves(square) const;
-  bitboard get_bishop_moves(square) const;
-  bitboard get_rook_moves(square) const;
-  bitboard get_queen_moves(square) const;
-  bitboard get_king_moves(square) const;  // doesnt include castling
+  bitboard get_pawn_moves(bitboard, color) const;
+  bitboard get_pawn_attacks(bitboard, color) const;
+  bitboard get_knight_moves(bitboard) const;
+  bitboard get_bishop_moves(bitboard) const;
+  bitboard get_rook_moves(bitboard) const;
+  bitboard get_queen_moves(bitboard) const;
+  bitboard get_king_moves(bitboard) const;  // doesnt include castling
 
   // return list of all pseudo legal moves for color
   std::vector<move> get_moves(color) const;
