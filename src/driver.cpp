@@ -34,29 +34,23 @@ static auto _split_string(const std::string& str, char delim) {
 }
 
 void show_board(game& g) {
+  using std::cout;
   auto fen = g.to_fen();
   auto pieces = _split_string(fen, ' ')[0];
   auto board = notation::to_chess_board(_split_string(pieces, '/'));
-  using std::cout;
-  cout << "\nBOARD: " << fen << std::endl;
-  cout << '\n';
+  cout << "\nBOARD: " << fen << std::endl << '\n';
   cout << "\n   a b c d e f g h";
   cout << "\n   ";
   for (int i = 0; i < 8; i++)
     cout << underline << "_" << reset_underline << " ";
   for (int i = 0; i < 64; i++) {
-    if (i % 8 == 0) {
-      cout << "\n" << (8 - i / 8) << " ";
-    }
+    if (i % 8 == 0) cout << "\n" << (8 - i / 8) << " ";
     cout << "|";
     cout << underline;
     auto x = board.get_piece(i);
     if (!x.is_empty()) {
-      if (x.pcolor == color::black)
-        cout << dark_color;
-      else
-        cout << light_color;
-      cout << bold << notation::to_AN(x) << reset_bold << reset_color;
+      cout << (x.pcolor == color::black ? dark_color : light_color) << bold
+           << notation::to_AN(x) << reset_bold << reset_color;
     } else {
       cout << ' ';
     }
@@ -156,10 +150,6 @@ auto minimax(const game& g, int alpha, int beta, int depth) {
       beta = min(beta, score);
     }
   }
-  if (score >= inf / 10)
-    score--;
-  else if (score <= -inf / 10)
-    score++;
   return std::make_tuple(score, best_move);
 }
 
@@ -179,6 +169,7 @@ auto choose_move(const game& g) {
 }
 
 int main(int argc, const char* argv[]) {
+  using namespace std::chrono;
   try {
     game g;
     if (argc > 1) {
@@ -190,15 +181,14 @@ int main(int argc, const char* argv[]) {
     show_moves(g);
     while (!g.is_terminal()) {
       if (g.get_color_to_move() == us) {
-        auto begin = std::chrono::steady_clock::now();
+        auto begin = steady_clock::now();
         auto [sc, _move] = choose_move(g);
-        auto end = std::chrono::steady_clock::now();
-        std::cout << "BOT: " << notation::to_AN(_move) << "  "
-                  << (sc > 0 ? "+" : "") << sc << " ("
-                  << std::chrono::duration_cast<std::chrono::milliseconds>(
-                         end - begin)
-                         .count()
-                  << "ms)\n";
+        auto end = steady_clock::now();
+        std::cout
+            << "BOT: " << notation::to_AN(_move) << "  " << (sc > 0 ? "+" : "")
+            << sc << " ("
+            << duration_cast<std::chrono::milliseconds>(end - begin).count()
+            << "ms)\n";
         g.make_move(_move);
       } else {
         std::string their_move;

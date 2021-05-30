@@ -43,7 +43,7 @@ bitboard game::get_moves(square i) const {
 
 // return list of all pseudo legal moves for color
 std::vector<move> game::get_moves(color c) const {
-  static auto pawn_promotions =
+  const static auto pawn_promotions =
       std::vector<piece_type>{piece_type::knight, piece_type::bishop,
                               piece_type::rook, piece_type::queen};
   auto moves = std::vector<move>{};
@@ -67,11 +67,11 @@ std::vector<move> game::get_moves(color c) const {
     }
   }
   // add castling explicitly
-  auto attacks = get_attacks(get_opposite_color(c)),
-       occupied = bitboard{board.black | board.white};
+  auto attacks = get_attacks(get_opposite_color(c));
   auto [sc, lc] = castling.get_castle_rights(c);
   auto king_sq = (c == color::white ? 60 : 4);
   if (!(sc || lc) || test_bit(attacks, king_sq)) return moves;
+  auto occupied = bitboard{board.black | board.white};
 
   auto add_castling = [&](const bitboard &safe, const bitboard &empty,
                           square dir) {
