@@ -4,20 +4,20 @@
 
 namespace abra {
 
-piece::piece() : pcolor{color::none}, ptype{piece_type::empty} {};
+piece::piece() : pcolor{color::none}, ptype{piece_type::empty} {}
 piece::piece(color _color, piece_type _type) : pcolor{_color}, ptype{_type} {
   assert(_color != color::none);
   assert(_type != piece_type::empty);
-};
+}
 
 move::move(square _from, square _to, piece _promotion)
-    : from{_from}, to{_to}, promotion{_promotion} {};
+    : from{_from}, to{_to}, promotion{_promotion} {}
 
 castle_rights::castle_rights()
     : white_short{false},
       white_long{false},
       black_short{false},
-      black_long{false} {};
+      black_long{false} {}
 
 board64::board64()
     : white{0},
@@ -27,13 +27,13 @@ board64::board64()
       bishop{0},
       rook{0},
       queen{0},
-      king{0} {};
+      king{0} {}
 
 std::pair<bool, bool> castle_rights::get_castle_rights(color c) const {
   using std::make_pair;
   return (c == color::white ? make_pair(white_short, white_long)
                             : make_pair(black_short, black_long));
-};
+}
 
 void board64::clear_piece(square i) {
   assert(is_valid_square(i));
