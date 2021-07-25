@@ -2,9 +2,18 @@
 
 #include <cassert>
 #include <cctype>
+#include <sstream>
 #include <stdexcept>
 
 namespace abra::notation {
+
+std::vector<std::string> split_string(const std::string &str, char delim) {
+  auto tokens = std::vector<std::string>{};
+  auto token = std::string{};
+  auto str_stream = std::istringstream{str};
+  while (std::getline(str_stream, token, delim)) tokens.push_back(token);
+  return tokens;
+}
 
 std::string to_AN(square sq) {
   assert(is_valid_square(sq));

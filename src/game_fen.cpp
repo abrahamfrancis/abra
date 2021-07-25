@@ -10,17 +10,8 @@
 
 namespace abra {
 
-// function to split string by delimiting character
-static auto _split_string(const std::string& str, char delim) {
-  auto tokens = std::vector<std::string>{};
-  auto token = std::string{};
-  auto str_stream = std::istringstream{str};
-  while (std::getline(str_stream, token, delim)) tokens.push_back(token);
-  return tokens;
-}
-
 game::game(const std::string& fen) : board{} {
-  auto tokens = _split_string(fen, ' ');
+  auto tokens = notation::split_string(fen, ' ');
   if (tokens.size() != 6)
     throw new std::invalid_argument("fen '" + fen +
                                     "' does not have exactly 6 fields");
@@ -29,7 +20,7 @@ game::game(const std::string& fen) : board{} {
        &castling_ability = tokens[2], &en_passant_target = tokens[3],
        &halfmove_clk = tokens[4], &fullmove_no = tokens[5];
 
-  auto rows = _split_string(piece_placement, '/');
+  auto rows = notation::split_string(piece_placement, '/');
   if (rows.size() != 8)
     throw new std::invalid_argument(
         "fen '" + fen + "' should have exactly 8 rows in piece placement");

@@ -4,7 +4,7 @@ CPPFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Wshadow -O3
 BUILD = build
 SRC = src
 
-engine: ${BUILD}/driver.o ${BUILD}/game.o ${BUILD}/game_fen.o ${BUILD}/game_moves.o ${BUILD}/game_make_move.o ${BUILD}/game_piece_moves.o ${BUILD}/notation.o ${BUILD}/types.o
+engine: ${BUILD}/main.o ${BUILD}/search.o ${BUILD}/display.o ${BUILD}/game.o ${BUILD}/game_fen.o ${BUILD}/game_moves.o ${BUILD}/game_make_move.o ${BUILD}/game_piece_moves.o ${BUILD}/notation.o ${BUILD}/types.o
 	$(CC) $(CPPFLAGS) $^ -o $@
 
 ${BUILD}/game.o: ${SRC}/game.h ${SRC}/types.h ${SRC}/game.cpp
@@ -28,8 +28,14 @@ ${BUILD}/types.o: ${SRC}/types.h ${SRC}/types.cpp
 ${BUILD}/notation.o: ${SRC}/types.h ${SRC}/notation.h ${SRC}/notation.cpp
 	$(CC) $(CPPFLAGS) -c ${SRC}/notation.cpp -o $@
 
-${BUILD}/driver.o: ${SRC}/game.h ${SRC}/notation.h ${SRC}/types.h ${SRC}/driver.cpp
-	$(CC) $(CPPFLAGS) -c ${SRC}/driver.cpp -o $@
+${BUILD}/display.o: ${SRC}/notation.h ${SRC}/display.h ${SRC}/game.h ${SRC}/display.cpp
+	$(CC) $(CPPFLAGS) -c ${SRC}/display.cpp -o $@
+
+${BUILD}/search.o: ${SRC}/game.h ${SRC}/search.h ${SRC}/minimax_search.cpp
+	$(CC) $(CPPFLAGS) -c ${SRC}/minimax_search.cpp -o $@
+
+${BUILD}/main.o: ${SRC}/game.h ${SRC}/notation.h ${SRC}/types.h ${SRC}/search.h ${SRC}/display.h ${SRC}/main.cpp
+	$(CC) $(CPPFLAGS) -c ${SRC}/main.cpp -o $@
 
 clean:
 	${RM} ${BUILD}/*

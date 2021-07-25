@@ -55,6 +55,9 @@ struct board64 {
 
   board64();
 
+  // rotate board individually
+  void rotate();
+
   // clear a piece from a square
   void clear_piece(square);
   // move piece from square to square (does not modify "initial square")
@@ -91,6 +94,10 @@ inline constexpr void move_bit(bitboard &b, square f, square t) {
 }
 inline int popcount(const bitboard &b) {
   return static_cast<int>(std::bitset<64>{b}.count());
+}
+inline void reverse_bits(bitboard &b) {
+  for (int i = 0; i < 32; i++)
+    if (test_bit(b, i) != test_bit(b, 63 - i)) flip_bit(b, i), flip_bit(b, 63 - i);
 }
 
 }  // namespace abra

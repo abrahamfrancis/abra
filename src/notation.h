@@ -44,6 +44,9 @@ castle_rights to_castle_rights(const std::string &);
 // convert fen piece placement to array of pieces
 board64 to_chess_board(const std::vector<std::string> &);
 
+// helper function to split string by delimiting character
+std::vector<std::string> split_string(const std::string &, char);
+
 }  // namespace abra::notation
 
 #endif

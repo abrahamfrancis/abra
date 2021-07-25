@@ -81,11 +81,15 @@ class game {
 
   // returns piece at square
   piece piece_at(square) const;
+
+  // return a copy of the board
+  board64 get_board() const;
 };
 
 inline const bitboard &game::get_colorb(color c) const {
   return (c == color::white ? board.white : board.black);
 }
+inline board64 game::get_board() const { return board; }
 inline color game::get_color_to_move() const { return color_to_move; }
 inline piece game::piece_at(square i) const { return board.get_piece(i); }
 

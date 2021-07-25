@@ -60,6 +60,17 @@ void board64::move_piece(square i, square j) {
   move_bit(king, i, j);
 }
 
+void board64::rotate() {
+  reverse_bits(white);
+  reverse_bits(black);
+  reverse_bits(pawn);
+  reverse_bits(knight);
+  reverse_bits(bishop);
+  reverse_bits(rook);
+  reverse_bits(queen);
+  reverse_bits(king);
+}
+
 void board64::set_piece(square i, piece x) {
   assert(is_valid_square(i));
 
