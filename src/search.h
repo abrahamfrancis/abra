@@ -27,6 +27,10 @@ class strategy {
 };
 
 using state = std::pair<game, int>;
+struct node_info {
+  move m;
+  int lb, ub;
+};
 
 class zobrist_hash {
   uint64_t pieces[64][6][2];
@@ -37,18 +41,18 @@ class zobrist_hash {
 
  public:
   zobrist_hash();
-  size_t operator()(const state &p) const;
+  size_t operator()(const state &) const;
 };
 
 class minimax_search : public strategy {
-  std::mt19937 rng;
-  std::unordered_map<state, move, zobrist_hash> cache;
+  std::unordered_map<state, node_info, zobrist_hash> cache;
   size_t max_cache_size;
 
  public:
   minimax_search(size_t = size_t(1e7));
   std::pair<int, move> choose_move(const game &g, int) override;
-  std::pair<int, move> minimax(const game &, int depth, int alpha, int beta);
+  int mtdf(const game &, int, int);
+  int minimax(const game &, int, int, int);
 };
 
 }  // namespace abra

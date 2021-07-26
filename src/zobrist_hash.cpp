@@ -21,8 +21,8 @@ zobrist_hash::zobrist_hash() {
 }
 
 size_t zobrist_hash::operator()(const state& st) const {
-	auto g = st.first;
-	auto depth = st.second;
+  auto g = st.first;
+  auto depth = st.second;
   auto hash = depths[depth];
   auto board = g.get_board();
   for (int i = 0; i < 64; i++) {

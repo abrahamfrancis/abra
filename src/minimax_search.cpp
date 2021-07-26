@@ -7,19 +7,25 @@ namespace abra {
 const int inf = int(1e5);
 
 minimax_search::minimax_search(size_t cache_size) {
-  std::random_device rd;
-  rng = std::mt19937(rd());  // initialize rng
-  // max_cache_size = cache_size;
-  max_cache_size = int(1e8);  // ~ 1gb
+  max_cache_size = cache_size;
 }
 
+// TODO: return prematurely if time crosses max_time
 std::pair<int, move> minimax_search::choose_move(const game &g, int max_time) {
-  return minimax(g, 6, -inf, inf);
+  // return minimax(g, 6, -inf, inf);
+  auto guess = 0;
+  auto max_depth = 6;
+  for (int d = 1; d <= max_depth; d++) {
+    guess = mtdf(g, d, guess);
+  }
+  auto st = std::make_pair(g, max_depth - 1);
+  assert(cache.find(st) != cache.end());  // move should be present in cache
+  return {guess, cache[st].m};
 }
 
 // clang-format off
-// store pst: taken from https://www.chessprogramming.org/Simplified_Evaluation_Function
-// modify to change evaluation function
+// Piece Square Table: taken from https://www.chessprogramming.org/Simplified_Evaluation_Function
+// modify to change evaluation function & bot behaviour
 const int pst[][64] = {
   // pawn
   {
@@ -127,55 +133,100 @@ int score(const game &g) {
   return sc;
 }
 
-std::pair<int, move> minimax_search::minimax(const game &g, int depth,
-                                             int alpha, int beta) {
-  if (depth <= 0 || g.is_terminal()) return {score(g), move{}};
+// Implement MTD(f), referred to from https://www.chessprogramming.org/MTD(f)
+
+int minimax_search::mtdf(const game &g, int depth, int f) {
+  auto guess = f;
+  auto upper = inf;
+  auto lower = -inf;
+  auto beta = 0;
+  while (lower < upper) {
+    if (guess == lower) {
+      beta = guess + 1;
+    } else {
+      beta = guess;
+    }
+    guess = minimax(g, depth, beta - 1, beta);
+    if (guess < beta) {
+      upper = guess;
+    } else {
+      lower = guess;
+    }
+  }
+  minimax(g, depth, beta - 1, beta); // to ensure presence in cache
+  return guess;
+}
+
+int minimax_search::minimax(const game &g, int depth, int alpha, int beta) {
+  using std::max;
+  using std::min;
+
+  if (depth <= 0 || g.is_terminal()) return score(g);
 
   auto moves = g.get_moves();
-  if (moves.empty()) return {score(g), move{}};
+  if (moves.empty()) return score(g);
 
   auto st = std::make_pair(g, depth - 1);
+
   if (cache.find(st) != cache.end()) {
-    auto mv = cache[st];
-    auto ng = g;
-    ng.make_move(mv);
-    return {score(ng), mv};
+    auto &n = cache[st];
+    if (n.lb >= beta)
+      return n.lb;
+    if (n.ub <= alpha)
+      return n.ub;
+    alpha = max(alpha, n.lb);
+    beta = min(beta, n.ub);
+  } else {
+    if (cache.size() >= max_cache_size) cache.clear();
+    cache[st] = node_info{move{}, -inf, inf};
   }
-  if (cache.size() >= max_cache_size) cache.clear();
 
-  std::shuffle(moves.begin(), moves.end(), rng);
+  auto &node = cache[st];
+
+  auto guess = 0;
+
   auto best_move = moves[0];
-  int score = 0;
 
-  if (g.get_color_to_move() == color::white) {  // Maximize
-    score = -inf;
+  if (depth == 0) {
+    guess = score(g);
+  } else if (g.get_color_to_move() == color::white) {  // Maximize
+    guess = -inf;
+    auto alpha_new = alpha;
     for (auto m : moves) {
       game new_game{g};
       new_game.make_move(m);
-      auto [x, mv] = minimax(new_game, depth - 1, alpha, beta);
-      if (x > score) {
-        score = x;
+      auto x = minimax(new_game, depth - 1, alpha_new, beta);
+      if (x > guess) {
+        guess = x;
         best_move = m;
       }
-      if (score >= beta) break;
-      alpha = std::max(alpha, score);
+      if (guess >= beta) break;
+      alpha_new = max(alpha_new, guess);
     }
   } else {  // Minimize
-    score = inf;
+    guess = inf;
+    auto beta_new = beta;
     for (auto m : moves) {
       game new_game{g};
       new_game.make_move(m);
-      auto [x, mv] = minimax(new_game, depth - 1, alpha, beta);
-      if (x < score) {
-        score = x;
+      auto x = minimax(new_game, depth - 1, alpha, beta_new);
+      if (x < guess) {
+        guess = x;
         best_move = m;
       }
-      if (score <= alpha) break;
-      beta = std::min(beta, score);
+      if (guess <= alpha) break;
+      beta_new = min(beta_new, guess);
     }
   }
-  cache[st] = best_move;
-  return {score, best_move};
+  node.m = best_move;
+  if (guess <= alpha) {
+    node.ub = guess;
+  } else if (guess < beta) {
+    node.lb = node.ub = guess;
+  } else {
+    node.lb = guess;
+  }
+  return guess;
 }
 
 }  // namespace abra
