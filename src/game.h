@@ -84,7 +84,25 @@ class game {
 
   // return a copy of the board
   board64 get_board() const;
+
+  castle_rights get_castle_rights() const;
+
+  square get_en_passant_sq() const;
+
+  bool operator==(const game &) const;
 };
+
+inline bool game::operator==(const game &other) const {
+  if (board != other.board) return false;
+  if (color_to_move != other.color_to_move) return false;
+  if (castling != other.castling) return false;
+  if (en_passant != other.en_passant) return false;
+  return true;
+}
+
+inline square game::get_en_passant_sq() const { return en_passant; }
+
+inline castle_rights game::get_castle_rights() const { return castling; }
 
 inline const bitboard &game::get_colorb(color c) const {
   return (c == color::white ? board.white : board.black);

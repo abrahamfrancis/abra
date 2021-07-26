@@ -26,11 +26,27 @@ class strategy {
   };
 };
 
-class minimax_search : public strategy {
-  std::mt19937 rng;
+using state = std::pair<game, int>;
+
+class zobrist_hash {
+  uint64_t pieces[64][6][2];
+  uint64_t colors[2];
+  uint64_t castlings[4];
+  uint64_t ep_files[8];
+  uint64_t depths[8];
 
  public:
-  minimax_search();
+  zobrist_hash();
+  size_t operator()(const state &p) const;
+};
+
+class minimax_search : public strategy {
+  std::mt19937 rng;
+  std::unordered_map<state, move, zobrist_hash> cache;
+  size_t max_cache_size;
+
+ public:
+  minimax_search(size_t = size_t(1e7));
   std::pair<int, move> choose_move(const game &g, int) override;
   std::pair<int, move> minimax(const game &, int depth, int alpha, int beta);
 };

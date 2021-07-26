@@ -4,7 +4,7 @@ CPPFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Wshadow -O3
 BUILD = build
 SRC = src
 
-engine: ${BUILD}/main.o ${BUILD}/search.o ${BUILD}/display.o ${BUILD}/game.o ${BUILD}/game_fen.o ${BUILD}/game_moves.o ${BUILD}/game_make_move.o ${BUILD}/game_piece_moves.o ${BUILD}/notation.o ${BUILD}/types.o
+engine: ${BUILD}/main.o ${BUILD}/search.o ${BUILD}/zobrist.o ${BUILD}/display.o ${BUILD}/game.o ${BUILD}/game_fen.o ${BUILD}/game_moves.o ${BUILD}/game_make_move.o ${BUILD}/game_piece_moves.o ${BUILD}/notation.o ${BUILD}/types.o
 	$(CC) $(CPPFLAGS) $^ -o $@
 
 ${BUILD}/game.o: ${SRC}/game.h ${SRC}/types.h ${SRC}/game.cpp
@@ -30,6 +30,9 @@ ${BUILD}/notation.o: ${SRC}/types.h ${SRC}/notation.h ${SRC}/notation.cpp
 
 ${BUILD}/display.o: ${SRC}/notation.h ${SRC}/display.h ${SRC}/game.h ${SRC}/display.cpp
 	$(CC) $(CPPFLAGS) -c ${SRC}/display.cpp -o $@
+
+${BUILD}/zobrist.o: ${SRC}/game.h ${SRC}/search.h ${SRC}/zobrist_hash.cpp
+	$(CC) $(CPPFLAGS) -c ${SRC}/zobrist_hash.cpp -o $@
 
 ${BUILD}/search.o: ${SRC}/game.h ${SRC}/search.h ${SRC}/minimax_search.cpp
 	$(CC) $(CPPFLAGS) -c ${SRC}/minimax_search.cpp -o $@

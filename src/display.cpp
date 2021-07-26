@@ -7,10 +7,9 @@ using std::cout;
 
 namespace abra {
 
-void show_board(const game& g) {
+void show_board(const game& g, color perspective) {
   auto board = g.get_board();
   auto fen = g.to_fen();
-  color perspective = g.get_color_to_move();
   if (perspective == color::black) board.rotate();
   cout << "\nBOARD: " << fen << std::endl << '\n';
   auto labels = (perspective == color::white ? std::string{"a b c d e f g h"}

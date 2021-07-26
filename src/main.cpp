@@ -28,8 +28,7 @@ void play_game(strategy& strat, bot_config& config) {
 
   game g = (config.position.empty() ? game{} : game{config.position});
 
-  show_board(g);
-  show_moves(g);
+  show_board(g, config.their_color);
   while (!g.is_terminal()) {
     if (g.get_color_to_move() == us) {
       auto begin = steady_clock::now();
@@ -41,6 +40,7 @@ void play_game(strategy& strat, bot_config& config) {
            << "ms)\n";
       g.make_move(_move);
     } else {
+      show_moves(g);
       std::string their_move;
       cout << "move: ";
       cin >> their_move;
@@ -61,8 +61,7 @@ void play_game(strategy& strat, bot_config& config) {
         continue;
       }
     }
-    show_board(g);
-    show_moves(g);
+    show_board(g, config.their_color);
   }
   auto result = g.get_result();
   if (result == us) {
@@ -76,7 +75,7 @@ void play_game(strategy& strat, bot_config& config) {
 
 int main(int argc, const char* argv[]) {
   try {
-    auto config = bot_config{color::white, 30000, "", ""};
+    auto config = bot_config{color::white, 10000, "", ""};
     // parse fen
     for (int i = 1; i < argc; i += 2) {
       auto flg = std::string{argv[i]};

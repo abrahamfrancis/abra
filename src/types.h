@@ -24,27 +24,46 @@ struct piece {
   piece();
   piece(color, piece_type);
   bool is_empty() const;
-  bool operator==(const piece &other) {
-    return pcolor == other.pcolor && ptype == other.ptype;
-  }
+  bool operator==(const piece &) const;
 };
+
+inline bool piece::operator==(const piece &other) const {
+  return pcolor == other.pcolor && ptype == other.ptype;
+}
 
 // represent a move
 struct move {
   square from, to;
   piece promotion;
   move(square = 0, square = 0, piece = {});
-  bool operator==(const move &other) {
-    return from == other.from && to == other.to && promotion == other.promotion;
-  }
+  bool operator==(const move &) const;
 };
+
+inline bool move::operator==(const move &other) const {
+  return from == other.from && to == other.to && promotion == other.promotion;
+}
 
 // represent castling rights
 struct castle_rights {
   bool white_short, white_long, black_short, black_long;
   castle_rights();
   std::pair<bool, bool> get_castle_rights(color) const;
+
+  bool operator==(const castle_rights &) const;
+  bool operator!=(const castle_rights &) const;
 };
+
+inline bool castle_rights::operator==(const castle_rights &other) const {
+  if (white_short != other.white_short) return false;
+  if (white_long != other.white_long) return false;
+  if (black_short != other.black_short) return false;
+  if (black_long != other.black_long) return false;
+  return true;
+}
+
+inline bool castle_rights::operator!=(const castle_rights &other) const {
+  return !(*this == other);
+}
 
 // represent 64 bit board
 using bitboard = uint64_t;
@@ -67,7 +86,26 @@ struct board64 {
   void set_piece(square, piece);
   // return piece at index
   piece get_piece(square) const;
+
+  bool operator==(const board64 &) const;
+  bool operator!=(const board64 &) const;
 };
+
+inline bool board64::operator==(const board64 &other) const {
+  if (white != other.white) return false;
+  if (black != other.black) return false;
+  if (pawn != other.pawn) return false;
+  if (knight != other.knight) return false;
+  if (bishop != other.bishop) return false;
+  if (rook != other.rook) return false;
+  if (queen != other.queen) return false;
+  if (king != other.king) return false;
+  return true;
+}
+
+inline bool board64::operator!=(const board64 &other) const {
+  return !(*this == other);
+}
 
 inline color get_opposite_color(color c) {
   assert(c != color::none);
