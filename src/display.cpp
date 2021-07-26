@@ -7,13 +7,14 @@ using std::cout;
 
 namespace abra {
 
-void show_board(const game& g, color perspective) {
+void show_board(const game& g) {
   auto board = g.get_board();
   auto fen = g.to_fen();
-  if (perspective == color::black)
-    board.rotate();
+  color perspective = g.get_color_to_move();
+  if (perspective == color::black) board.rotate();
   cout << "\nBOARD: " << fen << std::endl << '\n';
-  auto labels = (perspective == color::white ? std::string{"a b c d e f g h"}: std::string{"h g f e d c b a"});
+  auto labels = (perspective == color::white ? std::string{"a b c d e f g h"}
+                                             : std::string{"h g f e d c b a"});
   cout << "\n   " << labels;
   cout << "\n   ";
   for (int i = 0; i < 8; i++)

@@ -28,7 +28,7 @@ void play_game(strategy& strat, bot_config& config) {
 
   game g = (config.position.empty() ? game{} : game{config.position});
 
-  show_board(g, config.their_color);
+  show_board(g);
   show_moves(g);
   while (!g.is_terminal()) {
     if (g.get_color_to_move() == us) {
@@ -48,15 +48,20 @@ void play_game(strategy& strat, bot_config& config) {
         cout << "you resigned\n";
         return;
       }
-      auto mv = notation::to_move(their_move);
       auto moves = g.get_moves();
-      if (std::find(moves.begin(), moves.end(), mv) == moves.end()) {
-        cout << "illegal!" << std::endl;
+      try {
+        auto mv = notation::to_move(their_move);
+        if (std::find(moves.begin(), moves.end(), mv) == moves.end()) {
+          cout << "illegal!" << std::endl;
+          continue;
+        }
+        g.make_move(mv);
+      } catch (std::invalid_argument* err) {
+        cout << "ERROR: " << err->what() << std::endl;
         continue;
       }
-      g.make_move(mv);
     }
-    show_board(g, config.their_color);
+    show_board(g);
     show_moves(g);
   }
   auto result = g.get_result();

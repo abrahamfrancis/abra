@@ -16,7 +16,7 @@ const std::string bold{"\033[1m"};
 const std::string reset_bold{"\033[21m"};
 
 // display the board in a pretty format
-void show_board(const abra::game&, color);
+void show_board(const abra::game&);
 
 // display list of legal moves
 void show_moves(const abra::game&);
