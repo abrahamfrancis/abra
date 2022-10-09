@@ -1,4 +1,4 @@
-# abra
+# chess-engine
 A simple chess engine written in C++ 17
 
 ## Build & run
